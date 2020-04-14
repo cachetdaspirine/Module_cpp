@@ -8,6 +8,7 @@ class Site
   int g_I() const;
   int g_J() const;
   std::vector<int> g_nodes_to_create() const;
+  std::vector<int> g_nodes_to_output() const;
  private:
   int I,J;
   std::vector<int> Ineigh;

@@ -22,7 +22,6 @@ class System{
   // Thos are the only two public function in our class.
   double get_Energy() const;
   void UpdateEnergy(int* Array,int SizeX, int SizeY);
-  void UpdateState(int* Array,int SizeX, int SizeY);
   //Output functions :
   void OutputSpring(const char* filename);
   void OutputSite(const char* filename);

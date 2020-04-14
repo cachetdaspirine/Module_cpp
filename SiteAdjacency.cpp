@@ -33,6 +33,23 @@ _(__  ) / /_  _  /    / /_/ / / /__  / /_  / /_/ / _  /    /  __/
  /   0    \  /   ,j   \   \/
 /__________\/__________\
 
+
+                  6            7_________________________11
+                 /\             \                        /
+                /  \             \    1___________ 5    /
+               /    \             \    \          /    /
+              /      \             \    \  i,j   /    /
+             /        \             \    \      /    /
+            /     0    \             \    \    /    /
+           /     /\     \             \    \  /    /
+          /     /  \     \             \    \/    /
+         /     /    \     \             \    3   /
+        /     /      \     \             \      /
+       /     /   i,j  \     \             \    /
+      /   2 /__________\4    \             \  /
+    8/________________________\10           \/
+                                             9
+
 */
 
 std::vector<int> ISiteAdjacency(int i,int j){
@@ -75,18 +92,43 @@ std::vector<int> JSiteAdjacency(int i,int j){
 std::vector<int> g_nodes_from_site(const int i, const int j)
 {
   std::vector<int> Res;
-  Res.resize(3);
+  Res.resize(6);
   if((i+j)%2==0)
     {
       Res[0] = 1;
       Res[1] = 3;
       Res[2] = 5;
+      Res[3] = 7;
+      Res[4] = 9;
+      Res[5] = 11;
     }
   else
     {
       Res[0] = 0;
       Res[1] = 2;
       Res[2] = 4;
+      Res[3] = 6;
+      Res[4] = 8;
+      Res[5] = 10;
+    }
+  return Res;
+}
+
+std::vector<int> g_nodes_from_site_output(const int i, const int j)
+{
+  std::vector<int> Res;
+  Res.resize(3);
+  if((i+j)%2==0)
+    {
+      Res[0] = 7;
+      Res[1] = 9;
+      Res[2] = 11;
+    }
+  else
+    {
+      Res[0] = 6;
+      Res[1] = 8;
+      Res[2] = 10;
     }
   return Res;
 }

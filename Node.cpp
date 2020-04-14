@@ -4,21 +4,24 @@ using namespace std;
 
 Node::Node(){}
 
-Node::Node(int k, int i, int j)
+Node::Node(int k, int i, int j,double eps)
 {
-  vector<vector<int>> all(get_all(i,j,k));
-  I.resize(all.size());
-  J.resize(all.size());
-  for(int n=0; n<all.size(); n++)
+  map<int,vector<int>> all(get_all(i,j,k));
+  for(auto& it : all)
     {
-      I[n] = all[n][0];
-      J[n] = all[n][1];
+      I[it.first] = it.second[0];
+      J[it.first] = it.second[1];
     }
-  SetInitialPosition(X,Y,k,i,j);
+  SetInitialPosition(X,Y,k,i,j,eps);
+  //cout<<"index creator "<<i<<" "<<j<<" "<<k<<endl;
+  //for(auto& it : all){cout<<it.first<<" "<<it.second[0]<<" "<<it.second[1]<<endl;}
+  //cout<<this<<endl;
+  //cout<<endl;
 }
+Node::~Node(){}//cout<<"delete "<<this<<endl;}
 
-vector<int> Node::g_I() const{return I;}
-vector<int> Node::g_J() const{return J;}
+map<int,int> Node::g_I() const{return I;}
+map<int,int> Node::g_J() const{return J;}
 
 int Node::g_IX() const{return IX;}
 int Node::g_IY() const{return IY;}

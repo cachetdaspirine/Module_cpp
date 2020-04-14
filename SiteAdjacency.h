@@ -4,5 +4,6 @@
 std::vector<int> ISiteAdjacency(int i, int j);
 std::vector<int> JSiteAdjacency(int i, int j);
 std::vector<int> g_nodes_from_site(const int i, const int j);
+std::vector<int> g_nodes_from_site_output(const int i, const int j);
 
 #endif

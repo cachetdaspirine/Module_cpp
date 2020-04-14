@@ -6,7 +6,7 @@ class CG{
   double GetEnergy();
   void RemakeDoF(std::vector<Node*> nodes);
   void RemakeSprings(std::map<std::pair<Node*, Node*>, Spring*> springs);
-  void RemakeSpring3(std::map<int,Spring3*> springs);
+  void RemakeSpring3(std::map<std::pair<int,int>,Spring3*> springs);
   void ActualizeNodePosition(std::vector<Node*> nodes);
   void Evolv();
  private:

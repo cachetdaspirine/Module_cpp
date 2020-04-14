@@ -15,6 +15,10 @@ vector<int> Site::g_nodes_to_create() const
 {
   return g_nodes_from_site(I,J);
 }
+vector<int> Site::g_nodes_to_output() const
+{
+  return g_nodes_from_site_output(I,J);
+}
 
 int Site::g_I() const{return I;}
 int Site::g_J() const{return J;}

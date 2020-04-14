@@ -3,10 +3,11 @@
 class Node{
  public:
   Node();
-  Node(int k, int i,int j);
+  Node(int k, int i,int j,double eps);
+  ~Node();
   
-  std::vector<int> g_I() const;
-  std::vector<int> g_J() const;
+  std::map<int,int> g_I() const;
+  std::map<int,int> g_J() const;
 
   int g_IX() const;
   int g_IY() const;
@@ -21,8 +22,8 @@ class Node{
   void set_IY(int iy);
  private:
   // two vector for the list of index i,j for each k.
-  std::vector<int> I;
-  std::vector<int> J;
+  std::map<int,int> I;
+  std::map<int,int> J;
   int IX,IY;
   double X,Y;
 };

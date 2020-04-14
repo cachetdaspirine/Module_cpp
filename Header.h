@@ -41,6 +41,10 @@
 #include "Spring.h"
 #include "Spring3.h"
 
+#include "Ham.h"
+#include "CG.h"
+#include "System.h"
+
 // Include the structural part of the simulation
 #include "SiteAdjacency.h"
 #include "NodeAdjacency.h"
@@ -49,8 +53,5 @@
 //Require the structure to know how the nodes are arrange
 
 
-#include "Ham.h"
-#include "CG.h"
-#include "System.h"
 
 #endif

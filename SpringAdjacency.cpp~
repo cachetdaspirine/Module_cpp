@@ -69,25 +69,7 @@ double getK(int index1, int index2,System* system){
   return system->K2; // in the C function that create system we'll find a way to adjust K
 }
 double getKvol(int index1, int index2, int index3,System* system){return system->Kvol;}
-double getA0(int index1, int index2, int index3,System* system){
-  if(index1==1 & index2==3 & index3==5){
-    return sqrt(3)/4.*pow(1-system->eps,2);
-  }
-  else if(index1==0 & index2==2 & index3==4){
-    return sqrt(3)/4*pow(1-system->eps,2);
-  }
-  else if(index1==7 & index2==9 & index3==11){
-    return sqrt(3)/4*pow(1+system->eps,2);
-  }
-  else if(index1==6 & index2==8 & index3==10){
-    return sqrt(3)/4*pow(1+system->eps,2);
-  }
-  else{
-    cout<<"Error in the building of Spring3 cannot give a Rest area"<<endl;
-    cout<<index1<<" "<<index2<<" "<<index3<<endl;
-    exit(0);
-  }
-}
+double getA0(int index1, int index2, int index3,System* system){return 1;;}
 double getL0(int index1, int index2,System* system){
   if(index1==1 | index1==3 | index1==5 | index1==0 | index1==2 | index1==4){
     if(index2==1 | index2==0 | index2==2 | index2==3 | index2==4 |index2==5){

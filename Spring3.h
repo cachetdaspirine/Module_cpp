@@ -3,6 +3,7 @@
 class Spring3{
  public:
   Spring3(Node* n1, Node* n2, Node* n3,double k, double a0);
+  ~Spring3();
   void Multiplicitypp();
   Node const* g_N1() const;
   Node const* g_N2() const;

@@ -90,7 +90,7 @@ void System::UpdateEnergy(int *Array, int SizeX, int SizeY)
   MakeSpring3();
   ComputeEnergy();
 }
-void System::UpdateState(int *Array,int SizeX,int SizeY)
+void System::UpdateState(int *Array,int SizeX,intSizeY)
 {
   // Make the difference between this array and the "CurrentState" array to locate what changed.
   // We then delete/Re-create the sites/nodes/springs of this location.
