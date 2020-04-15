@@ -348,11 +348,11 @@ void System::OutputSpring(const char* filename)
   Out.open(filename, ofstream::out | ofstream::trunc);
   for(auto& it: springs)
     {
-      if(it.second->g_L0()==1+eps){
+      //if(it.second->g_L0()==1+eps){
       Out<<it.second->g_N1()->g_X()<<" "<<it.second->g_N1()->g_Y()<<" "
 	 <<it.second->g_N2()->g_X()<<" "<<it.second->g_N2()->g_Y()<<" "
 	 <<it.second->g_K()<<" "<<it.second->g_L0()<<endl;
-      }
+      //}
     }
   Out.close();
 }
