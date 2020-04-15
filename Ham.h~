@@ -4,7 +4,6 @@
 
 struct Ham{
   std::map<std::pair<Node*, Node*>, Spring*> springs;
-  vector<std::pair<Spring*,Node*>> LocalSprings;
   std::vector<Spring3*> springs3;
   double Eflip=0;
   void CheckSteadiness(VecDoub_I &x, double EmaxSpring, double EmaxSpring3)
@@ -22,9 +21,6 @@ struct Ham{
   Doub operator() (VecDoub_I &x)
   {
     Doub Nrj(0);
-    for(auto& it: LocalSpprings){
-      it.first->ComputeNRJ(x,it.second);
-    }
     for(auto& it: springs){
       Nrj+=it.second->ComputeNRJ(x);
     }
@@ -36,9 +32,6 @@ struct Ham{
   void df(VecDoub_I &x, VecDoub_O &deriv)
   {
     for (int i = 0; i < deriv.size(); i++) {deriv[i] = 0.;}
-    for(auto& it: LocalSpprings){
-      it.first->ComputeDerivative(x,deriv,it.second);
-    }
     for(auto& it : springs){
       it.second->ComputeDerivative(x,deriv);
     }

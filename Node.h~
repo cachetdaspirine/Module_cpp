@@ -12,8 +12,6 @@ class Node{
 
   int g_IX() const;
   int g_IY() const;
-  int g_IXloc() const;
-  int g_IYloc() const;
 
   double g_X() const;
   double g_Y() const;
@@ -23,15 +21,13 @@ class Node{
 
   void set_IX(int ix);
   void set_IY(int iy);
-  void set_IXloc(int ix);
-  void set_IYloc(int iy);
 
   void ResetPosition(int type);
  private:
   // two vector for the list of index i,j for each k.
   std::map<int,int> I;
   std::map<int,int> J;
-  int IX,IY,IXloc,IYloc;
+  int IX,IY;
   double X,Y;
   int dim;
 };

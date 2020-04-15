@@ -21,48 +21,9 @@ double Spring::ComputeNRJ(VecDoub_I &x){
   Nrj += Multiplicity * K / 2. * pow(Norm - L0, 2);
   return Nrj;
 }
-double Spring::ComputeNrj(VecDoub_I& x, Node* FixeNode)
-{
-  double XA,YA,XB,YB;
-  if(FixeNode==N1)
-    {
-      XA=x[N2->g_IXloc()];YA=x[N2->g_IYloc()];
-      XB=N1->g_X();YB=N1->g_Y();
-    }
-  else if(FixeNode==N2)
-    {
-      XA=x[N1->g_IXloc()];YA=x[N1->g_IYloc()];
-      XB=N2->g_X();YB=N2->g_Y();      
-    }
-  double Norm(sqrt(pow(XA - XB, 2) + pow(YA - YB, 2)));
-  double Nrj(0);
-  Nrj += Multiplicity * K / 2. * pow(Norm - L0, 2);
-  return Nrj;
-}
 
 void Spring::ComputeDerivative(VecDoub_I &x, VecDoub_O &deriv){
   double XA(x[N1->g_IX()]), XB(x[N2->g_IX()]), YA(x[N1->g_IY()]), YB(x[N2->g_IY()]);
-  double Norm(sqrt(pow(XA - XB, 2) + pow(YA - YB, 2)));
-  double Xforce, Yforce;
-  Xforce = Multiplicity * K * (Norm - L0) * (XA - XB) / Norm;
-  Yforce = Multiplicity * K * (Norm - L0) * (YA - YB) / Norm;
-  deriv[N1->g_IX()] += Xforce;
-  deriv[N1->g_IY()] += Yforce;
-  deriv[N2->g_IX()] += -Xforce;
-  deriv[N2->g_IY()] += -Yforce;
-}
-void Spring::ComputeDerivative(VecDoub_I &x, VecDoub_O &deriv,Node* FixedNode){
-  double XA,YA,XB,YB;
-  if(FixeNode==N1)
-    {
-      XA=x[N2->g_IXloc()];YA=x[N2->g_IYloc()];
-      XB=N1->g_X();YB=N1->g_Y();
-    }
-  else if(FixeNode==N2)
-    {
-      XA=x[N1->g_IXloc()];YA=x[N1->g_IYloc()];
-      XB=N2->g_X();YB=N2->g_Y();      
-    }
   double Norm(sqrt(pow(XA - XB, 2) + pow(YA - YB, 2)));
   double Xforce, Yforce;
   Xforce = Multiplicity * K * (Norm - L0) * (XA - XB) / Norm;

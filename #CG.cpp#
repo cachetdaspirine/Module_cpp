@@ -29,12 +29,8 @@ void CG::RemakeSpring3(std::map<std::pair<int,int>,Spring3*> springs3){
   for(auto& it: springs3){vectsprings3.push_back(it.second);}
   ham.springs3=vectsprings3;
 }
-void CG::LocalMinimize(std::map<std::pair<Node*,Node*>,Spring*> springs, std::vector<Node*> nodes)
-{
-  Ham LocHam;
-}
 
-double CG::GetEnergy(){return Energy;}
+Double CG::GetEnergy(){return Energy;}
 
 void CG::Evolv(){
   Frprmn<Ham> frprmn(ham);

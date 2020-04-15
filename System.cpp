@@ -58,14 +58,8 @@ System::System(const System& old_system)
   CurrentState=old_system.CurrentState;
   for(auto& it : old_system.sites){sites[it.first]=new Site(*(it.second));}
   for(auto& it : old_system.nodes){for(auto& it2 : it.second){
-      try{nodes[it.first].at(it2.first);}
-      catch(const std::out_of_range& oor){
-	Node* node=new Node(*(it2.second));
-      for(auto& it3 : node->g_I()){
-	nodes[it3.first][{node->g_I()[it3.first],node->g_J()[it3.first],it2.second->g_dim()}]=node;
-      }
-      }
-    }} 
+      nodes[it.first][it2.first]=new Node(*(it2.second));
+    }}
   MakeSprings();
   MakeSpring3();
   cg=new CG(K1,eps,K2,Kvol,sites.size());
@@ -177,7 +171,6 @@ void System::UpdateEnergy(int *Array, int SizeX, int SizeY)
   DEBUG_IF(true){cout<<"delete nodes"<<endl;}
   //for(auto& it: nodes){for(auto& it2 : it.second){delete it2.second;}}
   for(auto& it:nodes[0]){delete it.second;}
-  for(auto& it:nodes[6]){delete it.second;}
   nodes.clear();
   DEBUG_IF(true){cout<<"nodes all deleted"<<endl;}
   //--------------------------------
