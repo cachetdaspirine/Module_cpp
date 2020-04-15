@@ -37,6 +37,6 @@ void CG::Evolv(){
 void CG::ActualizeNodePosition(std::vector<Node*> nodes){
   for(auto& it: nodes){
     it->set_X(DoF[it->g_IX()]);
-    it->set_Y(DoF[it->g_IY()]);
+    it->set_Y(DoF[it->g_IY()]);    
   }
 }

@@ -132,3 +132,129 @@ std::vector<int> g_nodes_from_site_output(const int i, const int j)
     }
   return Res;
 }
+int Nneigh(int i,int j,const vector<int>& State,int Lx)
+{
+  vector<int> IN(ISiteAdjacency(i, j));
+  vector<int> JN(JSiteAdjacency(i, j));
+  int Nneigh(0);
+  for(int n=0;n<IN.size();n++){
+    if(State[IN[n]+JN[n]*Lx]==1){Nneigh++;}
+  }
+  return Nneigh;
+}
+set<int> GetNeighNodeSharedWithTwo(int i, int j, const vector<int>& State, int Lx)
+{
+  vector<int> IN(ISiteAdjacency(i, j));
+  vector<int> JN(JSiteAdjacency(i, j));
+  set<int> Res;
+  vector<int> NeighToNode(3);
+  if((i+j)%2==0){
+    NeighToNode={3,1,5};
+  }
+  else{
+    NeighToNode={0,2,4};
+  }
+  for( int n=0;n<IN.size();n++){
+    if(State[IN[n]+JN[n]*Lx]==1){
+      if(State[IN[(n+1)%3]+JN[(n+1)%3]*Lx]==0){
+	Res.insert(Res.begin(),NeighNode(n,NeighToNode[n+(n+1)%3-1]));
+      }
+      if(State[IN[(n+2)%3]+JN[(n+2)%3]*Lx]==0){
+	Res.insert(Res.begin(),NeighNode(n,NeighToNode[n+(n+2)%3-1]));
+      }
+    }
+  }
+  return Res;
+}
+int MagicDim(int i, int j)
+{
+  int ij(i+3*j);
+  if( ij==3 | ij==1){return 7;}
+  if(ij==9 | ij==13){return 11;}
+  if( ij==16 | ij==0){return 5;}
+  if(ij==10 | ij==6){return 15;}
+  if(ij==17 | ij==14){return 9;}
+  if(ij==5 | ij==8 ){return 13;}
+  cout<<"Magic dimension cannot be found i,j="<<i<<" "<<j<<endl;
+  exit(0);
+}
+int NeighNode(int i, int j)
+{
+  //cout<<"NeighNode"<<endl;
+  //cout<<i<<" "<<j<<endl;
+  int ij(i+3*j);
+  if(ij==1|ij==8){return 1;}
+  if(ij==5|ij==10){return 2;}
+  if(ij==13|ij==6){return 3;}
+  if(ij==17|ij==9){return 4;}
+  if(ij==14|ij==0){return 5;}
+  if(ij==16|ij==3){return 0;}
+  cout<<"cannot find the neighbors correspondance of this node IJ="<<i<<" "<<j<<endl;
+  exit(0);
+}
+set<int> GetNodeSharedWithTwo(int i, int j, const vector<int>& State, int Lx,map<int,int>& Dim)
+{
+  vector<int> IN(ISiteAdjacency(i, j));
+  vector<int> JN(JSiteAdjacency(i, j));
+  set<int> Res;
+  vector<int> NeighToNode(3);
+  if((i+j)%2==0){
+    NeighToNode={3,1,5};
+  }
+  else{
+    NeighToNode={0,2,4};
+  }
+  for( int n=0;n<IN.size();n++){
+    if(State[IN[n]+JN[n]*Lx]==1){
+      if(State[IN[(n+1)%3]+JN[(n+1)%3]*Lx]==0){
+	Res.insert(Res.begin(),NeighToNode[n+(n+1)%3-1]);
+	Dim[NeighToNode[n+(n+1)%3-1]]=MagicDim(n,NeighToNode[n+(n+1)%3-1]);
+      }
+      if(State[IN[(n+2)%3]+JN[(n+2)%3]*Lx]==0){
+	Res.insert(Res.begin(),NeighToNode[n+(n+2)%3-1]);
+	Dim[NeighToNode[n+(n+2)%3-1]]=MagicDim(n,NeighToNode[n+(n+2)%3-1]);
+      }
+    }
+  }
+   return Res;
+}
+map<int,int> set_dim(int SiteNum,const vector<int>& State,int Lx,int Ly)
+{
+  map<int,int> dim;
+  vector<int> Ind(3);
+  int i(SiteNum%Lx),j(SiteNum/Lx);
+  int Neigh(Nneigh(i,j,State,Lx));
+  vector<int> IN(ISiteAdjacency(i, j));
+  vector<int> JN(JSiteAdjacency(i, j));
+  
+  if((i+j)%2==0){Ind[0] = 5;Ind[1] = 1;Ind[2] = 3;}
+  else{Ind[0] = 4;Ind[1] = 2;Ind[2] = 0;}
+  
+  for(auto& it : Ind){dim[it]=0;dim[it+6]=0;}  
+  if(Neigh==0){for(auto& it : Ind){dim[it]=-SiteNum;dim[it+6]=-SiteNum;}return dim;}
+  
+  if(Neigh==1)
+    {
+      for(int n=0;n<IN.size();n++){
+	if(State[IN[n]+Lx*JN[n]]==1)
+	  {dim[Ind[n]]=n+1;dim[Ind[n]+6]=n+1;}//dim 1,2,3
+      }
+    }
+  map<int,int> Dim;
+  set<int> sharedIJ(GetNodeSharedWithTwo(i,j,State,Lx,Dim));
+  set<int> sharedNeigh,finalshared;
+  for(int n=0;n<IN.size();n++){
+    if(State[IN[n]+JN[n]*Lx]==1){
+      set<int> sharedN(GetNeighNodeSharedWithTwo(IN[n],JN[n],State,Lx));
+      sharedNeigh.insert(sharedN.begin(),sharedN.end());
+    }
+  }
+  set_intersection(sharedIJ.begin(),sharedIJ.end(),sharedNeigh.begin(),sharedNeigh.end(),inserter(finalshared,finalshared.begin()));
+  for(auto& it : finalshared){
+    dim[it]=Dim.at(it);
+    dim[it+6]=Dim.at(it);
+  }
+  return dim;
+}
+
+int g_Nnodes(){return 6;}// number of node per site

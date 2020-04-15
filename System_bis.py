@@ -68,26 +68,14 @@ lib = cdll.LoadLibrary('./lib.so')
 lib.CreateSystem.restype=POINTER(c_void_p)
 lib.CreateSystem.argtypes=[POINTER(c_int) , c_int,c_int, c_double,c_double,c_double,c_double]
 lib.DeleteSystem.argtypes=[c_void_p]
-lib.SetElasticConstant.argtypes=[c_double,c_double,c_double,c_double,c_void_p]
 
 lib.UpdateSystemEnergy.argtypes=[c_void_p,POINTER(c_int),c_int,c_int]
-lib.UpdateSystemState.argtypes=[c_void_p,POINTER(c_int),c_int,c_int]
 
 lib.GetSystemEnergy.restype=c_double
 lib.GetSystemEnergy.argtypes=[c_void_p]
 
 lib.OutputSystemSite.argtypes=[c_void_p,c_char_p]
 lib.OutputSystemSpring.argtypes=[c_void_p,c_char_p]
-
-lib.SetNodesPosition.argtypes=[c_void_p,POINTER(c_double),POINTER(c_double),POINTER(c_int),c_int]
-lib.get_X.argtypes=[c_void_p]
-lib.get_X.restype=POINTER(c_double)
-lib.get_Y.argtypes=[c_void_p]
-lib.get_Y.restype=POINTER(c_double)
-lib.get_Index.argtypes=[c_void_p]
-lib.get_Index.restype=POINTER(c_int)
-lib.g_Size.argtypes=[c_void_p]
-lib.g_Size.restype=c_int
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -115,21 +103,18 @@ cdict = {'blue':   ((0.0,  0.9,0.9),
 cm = LinearSegmentedColormap('my_colormap', cdict, 1024)
 
 class System:
-    def __init__(self,State,eps=0.,Kmain=1.,Kcoupling=1.,Kvol=1.):
+    def __init__(self,State,eps=0.,Kmain=1.,Kcoupling=1.,KVOL=1.):
         # The system is created by a 2D array for a 2D system the shape[0] is
         # the  Y  lengft  while  the  shape[1]  is  the  X  shape  the   most
         # important part of this object is self.adress which is the adress of
         # the pointer toward the cpp object. Each time we call a c++ function
         # we have to give it the adress of the  pointer,  that  the  function
         # will interpret as a pointer toward the c++ object
-        self.Lx=State.shape[0] # X size of the system !!!!! shape[1] !!!!!!
-        self.Ly=State.shape[1] # Y size of the system !!!!! shape[0] !!!!!!
+        self.Lx=State.shape[1] # X size of the system !!!!! shape[1] !!!!!!
+        self.Ly=State.shape[0] # Y size of the system !!!!! shape[0] !!!!!!
         #--------------Convert the array into a pointer array---------------
         self.state=State # store the value of the binary system as a 2D array
-        array=np.zeros(State.shape[0]*State.shape[1],dtype=int)
-        for i in range(State.shape[0]):
-            for j in range(State.shape[1]):
-                array[i+j*State.shape[0]]=State[i,j]
+        array = State.flatten() # the c++ program only takes 1D array
         Arraycpp = array.ctypes.data_as(POINTER(c_int)) # declare a pointer array of integer (ctypes type)
         for i in range(array.shape[0]):
             Arraycpp[i]=array[i] # store all the array into this pointer array
@@ -138,22 +123,18 @@ class System:
         #-------------------------------------------------------------------        
         self.Kmain=Kmain
         self.Kcoupling=Kcoupling
-        self.KVOL=Kvol
+        self.KVOL=KVOL
         self.eps=eps
         self.ActualizeNp() # keep track of the number of particle (number of 1) in the system
-        #---------------------Create the cpp object-------------------------
-        self.Adress=lib.CreateSystem(Arraycpp,self.Lx,self.Ly,eps,Kmain,Kcoupling,Kvol) # create the system, all the argument are require here !!!!
-        #--------------------Store the value of the Energy------------------
-        self.Energy=lib.GetSystemEnergy(self.Adress) # store the value of the Energy (get energy only returns a number and doesn't reactualize the equilibrium of the system).
+        if self.Np>=1: # Error from the cpp module are hard to catch for python, therefore we have to make sure that everything is well set before
+            #---------------------Create the cpp object-------------------------
+            self.Adress=lib.CreateSystem(Arraycpp,self.Lx,self.Ly,eps,Kmain,Kcoupling,KVOL) # create the system, all the argument are require here !!!!
+            #--------------------Store the value of the Energy------------------
+            self.Energy=lib.GetSystemEnergy(self.Adress) # store the value of the Energy (get energy only returns a number and doesn't reactualize the equilibrium of the system).
+        else:
+            self.Energy=0
     def __del__(self):
         lib.DeleteSystem(self.Adress) # deleting pointers is important in c++
-    def PrintBinary(self):
-        # function that print the 0/1 array in the right order. So that there
-        # is a direct correspondance between 0/1 maps and the triangle
-        for j in reversed(range(self.state.shape[1])):
-            for i in range(self.state.shape[0]):
-                print(str(self.state[i,j])+" ",end='')
-            print('\n',end='')       
     def SetElasticConstant(self,Kmain=np.nan,Kcoupling=np.nan,epsilon=np.nan,KVOL=np.nan):
         # This is a single  function to  change any of the elastic constant.
         # the elastic constant for which we give a value is gonna be changed
@@ -174,76 +155,42 @@ class System:
             epsilon1=self.eps
         else :
             epsilon1=epsilon
-        lib.SetElasticConstant(epsilon1,Kmain1,Kcoupling1,KVOL1,self.Adress)
-    def Evolv(self,NewState):            
-        self.ActualizeNp()
-        #------------Convert the new state into a pointer array-------------
-        self.state=NewState
-        array=np.zeros(self.state.shape[0]*self.state.shape[1],dtype=int)
-        for i in range(self.state.shape[0]):
-            for j in range(self.state.shape[1]):
-                array[i+j*self.state.shape[0]]=self.state[i,j]
-        Arraycpp = array.ctypes.data_as(POINTER(c_int))
-        for i in range(array.shape[0]):
-            Arraycpp[i]=array[i]
-        #-------------------------------------------------------------------
-        # Second most important function you give a new state and it computes
-        # the new equilibrium  state,  ît just goes faster as the newstate is
-        # close to the previous one.
-        if NewState.shape[0] != self.Lx or NewState.shape[1] != self.Ly :
-            # if we changed the size of the system, we remake the whole system
-            self.Lx=NewState.shape[0]
-            self.Ly=NewState.shape[1]
-            lib.DeleteSystem(self.Adress)
-            self.Adress=lib.CreateSystem(Arraycpp,self.Lx,self.Ly,self.eps,self.Kmain,self.Kcoupling,self.KVOL)
-            self.Energy=lib.GetSystemEnergy(self.Adress)
-            print('create a new system')
-        else :
-            lib.UpdateSystemEnergy(self.Adress,Arraycpp,self.Lx,self.Ly) 
-            self.Energy=lib.GetSystemEnergy(self.Adress)
-    def UpdateState(self,NewState):
-        self.ActualizeNp()
-        #------------Convert the new state into a pointer array-------------
-        self.state=NewState
-        array=np.zeros(self.state.shape[0]*self.state.shape[1],dtype=int)
-        for i in range(self.state.shape[0]):
-            for j in range(self.state.shape[1]):
-                array[i+j*self.state.shape[0]]=self.state[i,j]
-        Arraycpp = array.ctypes.data_as(POINTER(c_int))
-        for i in range(array.shape[0]):
-            Arraycpp[i]=array[i]
-        #-------------------------------------------------------------------
-        # Second most important function you give a new state and it computes
-        # the new equilibrium  state,  ît just goes faster as the newstate is
-        # close to the previous one.
-        #if NewState.shape[0] != self.Lx or NewState.shape[1] != self.Ly :
-            # if we changed the size of the system, we remake the whole system
-        #     self.Lx=NewState.shape[0]
-        #     self.Ly=NewState.shape[1]
-        #     lib.DeleteSystem(self.Adress)
-        #     self.Adress=lib.CreateSystem(Arraycpp,self.Lx,self.Ly,self.eps,self.Kmain,self.Kcoupling,self.KVOL)
-        #     self.Energy=lib.GetSystemEnergy(self.Adress)
-        #     print('create a new system')
-        #else :
-        lib.UpdateSystemState(self.Adress,Arraycpp,self.Lx,self.Ly)    
+        lib.SetElasticConstant(epsilon1,Kmain1,KCoupling1,KVOL1,self.Adress)
+    def Evolv(self,NewState):
+        # distinguish the case were
+        if self.Np==0:
+            self.ActualizeNP()
+            if self.Np>=1:
+                array = NewState.flatten()
+                Arraycpp = array.ctypes.data_as(POINTER(c_int))
+                self.Adress=lib.CreateSystem(Arraycpp,self.Lx,self.Ly,eps,Kmain,Kcoupling,KVOL)
+                self.Energy=lib.GetSystemEnergy(self.Adress)
+            else :
+                self.Energy=0.
+        else:
+            self.ActualizeNP()
+            if self.Np>=1:
+                #------------Convert the new state into a pointer array-------------
+                array = NewState.flatten()
+                Arraycpp = array.ctypes.data_as(POINTER(c_int))
+                for i in range(array.shape[0]):
+                    Arraycpp[i]=array[i]
+                    #-------------------------------------------------------------------
+                    lib.UpdateSystemEnergy(self.Adress,Arraycpp,self.Lx,self.Ly)
+                    self.Energy=lib.GetSystemEnergy(self.Adress)
+                else:
+                    self.Energy=0.
     def PrintPerSite(self,Name='NoName.txt'):
-        # output the sytem per site (easier if you wanna plot the sites).
         if self.Np<1:
             print("can t output an empty system")
             return 0.
         lib.OutputSystemSite(self.Adress,Name.encode('utf-8'))
     def PrintPerSpring(self,Name='NoName.txt'):
-        # output the system per spring (easier if you wanna plot the springs).
         if self.Np<1:
             print("can t output an empty system")
             return 0.
         lib.OutputSystemSpring(self.Adress,Name.encode('utf-8'))
     def PlotPerSite(self,figuresize=(7,5),Zoom=1.):
-        # this one has a trick, it only 'works' on UNIX system and
-        # it requires to be autorized to edit and delete file. The
-        # idea is to use the function  in  order  to  PrintPersite
-        # create  a  file  that we load, then delete. Then  we use
-        # matplotlib triangle patches to plot the system
         if self.Np<1:
             print("can t output an empty system")
             return 0.
@@ -268,12 +215,6 @@ class System:
 
         plt.show()
     def PlotPerSpring(self,figuresize=(7,5),Zoom=1.,):
-        # this one has a trick, it only 'works' on UNIX system and
-        # it requires to be autorized to edit and delete file. The
-        # idea is to use the function  in  order  to  PrintPersite
-        # create  a  file  that we load, then delete. Then  we use
-        # matplotlib  quiver  (that plot vector field) to plot the
-        # springs.
         if self.Np<1:
             print("can t output an empty system")
             return 0.
@@ -305,18 +246,9 @@ class System:
         #plot.colorbar.show()
         plt.show()
     def ActualizeNp(self):
-        # transform the array of 0 and  1 into a dictionnary, which key is
-        # the 0s or 1s and the respective value is the number of particles
-        # or the number of empty sites
         try:
             unique, counts = np.unique(self.state, return_counts=True)
             self.Np=dict(zip(unique, counts))[1]
         except:
             self.Np=0
-    def StoreNodesPosition(self):
-        self.ArraySize=lib.g_Size(self.Adress)
-        self.X=lib.get_X(self.Adress)
-        self.Y=lib.get_Y(self.Adress)
-        self.Index=lib.get_Index(self.Adress)
-    def SetNodesPosition(self):
-        lib.SetNodesPosition(self.Adress,self.X,self.Y,self.Index,self.ArraySize)
+        

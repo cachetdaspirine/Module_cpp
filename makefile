@@ -4,6 +4,7 @@ OPT = -O3 #optimisation de ouf
 SharedLib = lib.so
 DEBUG=no
 NAME=Aight
+MEMCHECK= #-g
 
 SRC=$(wildcard *.cpp)
 
@@ -24,7 +25,7 @@ $(SharedLib) : $(OBJ)
 main.o: $(SRC) $(HEAD)
 
 .cpp.o:
-	$(CC) $(Version) -fPIC $(OPT) -c $< -o $@ $(FLAG)
+	$(CC) $(Version) -fPIC $(OPT) -c $< -o $@ $(FLAG) $(MEMCHECK)
 
 .PHONY: clean
 
@@ -33,4 +34,4 @@ clean:
 .PHONY: EXEC
 
 EXEC: $(OBJ)
-	$(CC) $(OPT) $(OBJ)  -o $(NAME) $(FLAG)
+	$(CC) $(OPT) $(OBJ)  -o $(NAME) $(FLAG) $(MEMCHECK)

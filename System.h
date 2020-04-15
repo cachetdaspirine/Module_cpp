@@ -21,11 +21,17 @@ class System{
   //-----------------------------------------------------------------------------------------------  
   // Thos are the only two public function in our class.
   double get_Energy() const;
-  void UpdateEnergy(int* Array,int SizeX, int SizeY);
-  void UpdateState(int* Array,int SizeX, int SizeY);
+  void UpdateEnergy(int* Array,int SizeX, int SizeY,bool Evolv);
+  void SaveNodesPosition();
+  void RebuildNodesPosition();
+  void SetXYIndex(double* NewX,double* NewY,int* NewIndex, int NewSize);
   //Output functions :
   void OutputSpring(const char* filename);
   void OutputSite(const char* filename);
+  double*  g_X() const;
+  double*  g_Y() const;
+  int* g_Index() const;
+  int g_size() const;
   //-----------------------------------------------------------------------------------------------
   double K1,K2,Kvol,eps;
  private:
@@ -38,9 +44,12 @@ class System{
   // - make the springs from the nodes array (springs have pre-built constructor for that).
   // - the function ComputeEnergy just talk to the object CG to obtain an energy from the springs.
   std::map<int,Site*> sites;
-  std::map<int,std::map<std::pair<int,int>,Node*>> nodes;
+  std::map<int,std::map<std::tuple<int,int,int>,Node*>> nodes;
   std::map<std::pair<Node*,Node*>,Spring*> springs; // the springs are sorted by their node
   std::map<std::pair<int,int>,Spring3*> springs3;
+  double* X;
+  double* Y;
+  int* Index;
   void MakeSites();
   void MakeNodes();
   void MakeSprings();
@@ -48,7 +57,7 @@ class System{
   void ComputeEnergy();
   void DeleteNodeSpring(int SiteIndex);
   //-----------------------------------------------------------------------------------------------
-  int Lx,Ly;
+  int Lx,Ly,IndexSize;
   CG* cg;
 };
 #endif

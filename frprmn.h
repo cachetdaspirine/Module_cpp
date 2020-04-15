@@ -13,8 +13,8 @@ struct Frprmn : Dlinemethod<T> {
 	using Dlinemethod<T>::p;
 	using Dlinemethod<T>::xi;
 	const Doub ftol;
-	Frprmn(T &funcd, const Doub ftoll=1e-7) : Dlinemethod<T>(funcd),
-	ftol(ftoll) {}
+ Frprmn(T &funcd, const Doub ftoll=1e-10) : Dlinemethod<T>(funcd),
+	  ftol(ftoll) {}
 //	Constructor arguments are funcd, the function or functor to be minimized, and an optional
 //	argument ftoll, the fractional tolerance in the function value such that failure to decrease
 //	by more than this amount on one iteration signals doneness.
@@ -23,7 +23,7 @@ struct Frprmn : Dlinemethod<T> {
 //	and gradient are provided by a functor funcd (see text).
 	{
 		const Int ITMAX=1000000000;
-		const Doub EPS=1.0e-18;
+		const Doub EPS=1.0e-10;//18;
 		const Doub GTOL=1.0e-8;
 				
 //		Here ITMAX is the maximum allowed number of iterations; EPS is a small number to
