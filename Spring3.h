@@ -8,7 +8,7 @@ class Spring3{
   Node const* g_N1() const;
   Node const* g_N2() const;
   Node const* g_N3() const;
-  double ComputeNRJ(VecDoub_I &x);
+  double ComputeNRJ(VecDoub_I &x,double& Eflip);
   void ComputeDerivative(VecDoub_I &x, VecDoub_O &deriv);
  private:
   Node* N1;

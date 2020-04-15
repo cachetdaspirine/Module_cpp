@@ -2,7 +2,11 @@
 
 using namespace std;
 
-CG::CG(){
+CG::CG(double K, double EPS, double KAPPA,double KVOL,int Npart){
+  BulkEnergy=3*K*EPS*EPS;
+  BulkEnergy+=3*KAPPA*pow(sqrt(pow(EPS * 2 / sqrt(3)+ sqrt(3)/2*(1-EPS),2)+pow((1-EPS)/2,2))-1,2);
+  BulkEnergy+=KVOL*EPS*EPS*3./4.;
+  BulkEnergy=BulkEnergy*Npart;
   Energy=0;
 }
 
@@ -33,10 +37,34 @@ void CG::Evolv(){
   DoF=frprmn.minimize(DoF);
   Energy=ham(DoF);
 }
-
+bool CG::CheckStability(){
+  if(ham(DoF)>BulkEnergy)
+    {
+      cout<<"System unsteady : reset nodes position"<<endl;return true;
+    }
+  if(ham.Eflip!=0){return true;}
+  return false;
+}
 void CG::ActualizeNodePosition(std::vector<Node*> nodes){
   for(auto& it: nodes){
-    it->set_X(DoF[it->g_IX()]);
-    it->set_Y(DoF[it->g_IY()]);    
+    if(it->g_IX()!=-1 or it->g_IY()!=-1)
+      {
+	it->set_X(DoF[it->g_IX()]);
+	it->set_Y(DoF[it->g_IY()]);
+      }
   }
+}
+void CG::ActualizeGPosition(std::map<int,Site*> sites, std::map<int,std::map<std::tuple<int,int,int>,Node*>> nodes)
+{
+  for(auto& it : sites)
+    {
+      double Xg(0),Yg(0);
+      vector<int> NodesIndex(g_nodes_from_site(it.second->g_I(),it.second->g_J()));
+      for(auto& Ind : NodesIndex)
+	{
+	  Xg+=nodes[Ind][{it.second->g_I(),it.second->g_J(),it.second->g_dim(Ind)}]->g_X()/6.;
+	  Yg+=nodes[Ind][{it.second->g_I(),it.second->g_J(),it.second->g_dim(Ind)}]->g_Y()/6.;
+	}
+      it.second->set_G(Xg,Yg);
+    }
 }

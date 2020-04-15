@@ -192,6 +192,29 @@ int NeighNode(int i, int j)
   cout<<"cannot find the neighbors correspondance of this node IJ="<<i<<" "<<j<<endl;
   exit(0);
 }
+void Compute_G(Site* This,Site* Neigh)
+{
+  if(Neigh->g_J()==This->g_J()){
+    if(Neigh->g_I()==This->g_I()-1){
+      if(This->g_down()){This->set_G(Neigh->g_Xg()+0.5,Neigh->g_Yg()+0.2887);return;}
+      else{This->set_G(Neigh->g_Xg()+0.5,Neigh->g_Yg()-0.2887);return;}
+    }
+    else if(Neigh->g_I()==This->g_I()+1){
+      if(This->g_down()){This->set_G(Neigh->g_Xg()-0.5,Neigh->g_Yg()+0.2887);return;}
+      else{This->set_G(Neigh->g_Xg()-0.5,Neigh->g_Yg()-0.2887);return;}      
+    }
+  }
+  else if(Neigh->g_J()==This->g_J()-1){
+    This->set_G(Neigh->g_Xg(), Neigh->g_Yg()+0.5774);return;
+  }
+  else if(Neigh->g_J()==This->g_J()+1){
+    This->set_G(Neigh->g_Xg(), Neigh->g_Yg()- 0.5774);return;
+  }
+  cout<<"the site given is not a neighbor : "<<endl;
+  cout<<"neighbor : "<<Neigh->g_I()<<" "<<Neigh->g_J()<<endl;
+  cout<<"this pointer : "<<This->g_I()<<" "<<This->g_J()<<endl;
+  exit(0);
+}
 set<int> GetNodeSharedWithTwo(int i, int j, const vector<int>& State, int Lx,map<int,int>& Dim)
 {
   vector<int> IN(ISiteAdjacency(i, j));

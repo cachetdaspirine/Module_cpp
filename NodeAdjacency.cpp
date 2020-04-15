@@ -135,10 +135,32 @@ std::map<int,std::vector<int>> get_all(int i, int j, int k){
   }
   return Res;
 };
-void SetInitialPosition(double& X, double& Y, int NodeIndex, int SiteI, int SiteJ,double eps){
-  X = SiteI*0.5;
-  Y = 0.2887 + SiteJ * 0.866;
-  if((SiteI+SiteJ)%2==1){//up
+
+void SetInitialPosition(double& X, double& Y, int NodeIndex, bool down,double eps, double Xg, double Yg){
+  X = Xg;
+  Y = Yg;
+
+  if(down){// down
+    if (NodeIndex==3) {
+      Y -= 0.5774 * (1-eps);
+    } else if (NodeIndex == 1) {
+      X -= 0.5 * (1-eps);
+      Y += 0.2887 * (1-eps);
+    } else if(NodeIndex == 5){
+      X += 0.5 * (1-eps);
+      Y += 0.2887 * (1-eps);
+    }
+    if (NodeIndex==9) {
+      Y -= 0.5774 * (1+eps);
+    } else if (NodeIndex == 7) {
+      X -= 0.5 * (1+eps);
+      Y += 0.2887 * (1+eps);
+    } else if(NodeIndex == 11){
+      X += 0.5 * (1+eps);
+      Y += 0.2887 * (1+eps);
+    }
+  }
+  else{//up
     if (NodeIndex == 0) {
       Y += 0.5774 *(1-eps);
     } else if (NodeIndex == 4) {
@@ -159,25 +181,4 @@ void SetInitialPosition(double& X, double& Y, int NodeIndex, int SiteI, int Site
     }
 
   }
-  else{// down
-    if (NodeIndex==3) {
-      Y -= 0.5774 * (1-eps);
-    } else if (NodeIndex == 1) {
-      X -= 0.5 * (1-eps);
-      Y += 0.2887 * (1-eps);
-    } else if(NodeIndex == 5){
-      X += 0.5 * (1-eps);
-      Y += 0.2887 * (1-eps);
-    }
-    if (NodeIndex==9) {
-      Y -= 0.5774 * (1+eps);
-    } else if (NodeIndex == 7) {
-      X -= 0.5 * (1+eps);
-      Y += 0.2887 * (1+eps);
-    } else if(NodeIndex == 11){
-      X += 0.5 * (1+eps);
-      Y += 0.2887 * (1+eps);
-    }
-  }
 };
-

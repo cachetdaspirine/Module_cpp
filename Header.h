@@ -36,8 +36,8 @@
 #include "dlinmin.h"
 #include "frprmn.h"
 
-#include "Node.h"
 #include "Site.h"
+#include "Node.h"
 #include "Spring.h"
 #include "Spring3.h"
 

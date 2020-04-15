@@ -16,22 +16,16 @@ class System{
   // give a value to the energy.
   System(int* Array, int sizeX, int sizeY,double epsilon,double Kmain,double Kcoupling,double KVOL);
   //-----------------------------------------------------------------------------------------------
+  System(const System& old_system);
   // The destructor delete all the sites/nodes/springs pointers.
   ~System();
   //-----------------------------------------------------------------------------------------------  
   // Thos are the only two public function in our class.
   double get_Energy() const;
-  void UpdateEnergy(int* Array,int SizeX, int SizeY,bool Evolv);
-  void SaveNodesPosition();
-  void RebuildNodesPosition();
-  void SetXYIndex(double* NewX,double* NewY,int* NewIndex, int NewSize);
+  void UpdateEnergy(int* Array,int SizeX, int SizeY);
   //Output functions :
   void OutputSpring(const char* filename);
   void OutputSite(const char* filename);
-  double*  g_X() const;
-  double*  g_Y() const;
-  int* g_Index() const;
-  int g_size() const;
   //-----------------------------------------------------------------------------------------------
   double K1,K2,Kvol,eps;
  private:
@@ -47,17 +41,18 @@ class System{
   std::map<int,std::map<std::tuple<int,int,int>,Node*>> nodes;
   std::map<std::pair<Node*,Node*>,Spring*> springs; // the springs are sorted by their node
   std::map<std::pair<int,int>,Spring3*> springs3;
-  double* X;
-  double* Y;
-  int* Index;
+  void ResetNodePosition();
+  bool NeighExist(int i, int j, int k);
+  void g_G(int i, int j,double& Xg, double& Yg);
   void MakeSites();
+  void ActualizeSites(std::vector<int>& Removed, std::vector<int>& Added);
   void MakeNodes();
   void MakeSprings();
   void MakeSpring3();
   void ComputeEnergy();
-  void DeleteNodeSpring(int SiteIndex);
+  void DeleteAllNode(int i, int j);
   //-----------------------------------------------------------------------------------------------
-  int Lx,Ly,IndexSize;
+  int Lx,Ly;
   CG* cg;
 };
 #endif

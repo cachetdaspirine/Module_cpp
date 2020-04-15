@@ -17,8 +17,7 @@ Node const* Spring3::g_N1() const{return N1;}
 Node const* Spring3::g_N2() const{return N2;}
 Node const* Spring3::g_N3() const{return N3;}
 
-double Spring3::ComputeNRJ(VecDoub_I &x){
-  double Eflip(0);
+double Spring3::ComputeNRJ(VecDoub_I &x, double& Eflip){
   double X1(x[N1->g_IX()]),Y1(x[N1->g_IY()]);
   double X2(x[N2->g_IX()]),Y2(x[N2->g_IY()]);
   double X3(x[N3->g_IX()]),Y3(x[N3->g_IY()]);
@@ -32,7 +31,7 @@ double Spring3::ComputeNRJ(VecDoub_I &x){
     Sthet=(((X2-X1)*(Y3-Y1)-(Y2-Y1)*(X3-X1)))/sqrt((pow(X2-X1,2)+pow(Y2-Y1,2))*(pow(X3-X1,2)+pow(Y3-Y1,2)));
     //Check that thet € [-1;1]
     //if(Sthet<-1 | Sthet>1){cout<<"Sthet no well defined"<<endl;cout<<"Sthet="<<Sthet<<" x1,y1,x2,y2,x3,y3 "<<X1<<" "<<Y1<<" "<<X2<<" "<<Y2<<" "<<X3<<" "<<Y3<<endl;exit(0);}
-    double Hmin(10000),Hmax(160000),Sthetbar(0.01);
+    double Hmin(100),Hmax(1600),Sthetbar(0.01);
     if(Sthet<0){Eflip=(Hmin-Hmax)*Sthet+Hmin;}
     else{Eflip=Hmin*exp(-Sthet/Sthetbar);}
   }

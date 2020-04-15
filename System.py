@@ -67,27 +67,18 @@ lib = cdll.LoadLibrary('./lib.so')
 
 lib.CreateSystem.restype=POINTER(c_void_p)
 lib.CreateSystem.argtypes=[POINTER(c_int) , c_int,c_int, c_double,c_double,c_double,c_double]
-lib.DeleteSystem.argtypes=[c_void_p]
-lib.SetElasticConstant.argtypes=[c_double,c_double,c_double,c_double,c_void_p]
+lib.DeleteSystem.argtypes=[POINTER(c_void_p)]
+lib.CopySystem.argtypes=[POINTER(c_void_p)]
+lib.CopySystem.restype=POINTER(c_void_p)
 
-lib.UpdateSystemEnergy.argtypes=[c_void_p,POINTER(c_int),c_int,c_int]
-lib.UpdateSystemState.argtypes=[c_void_p,POINTER(c_int),c_int,c_int]
+lib.SetElasticConstant.argtypes=[c_double,c_double,c_double,c_double,POINTER(c_void_p)]
+lib.UpdateSystemEnergy.argtypes=[POINTER(c_void_p),POINTER(c_int),c_int,c_int]
 
 lib.GetSystemEnergy.restype=c_double
-lib.GetSystemEnergy.argtypes=[c_void_p]
+lib.GetSystemEnergy.argtypes=[POINTER(c_void_p)]
 
-lib.OutputSystemSite.argtypes=[c_void_p,c_char_p]
-lib.OutputSystemSpring.argtypes=[c_void_p,c_char_p]
-
-lib.SetNodesPosition.argtypes=[c_void_p,POINTER(c_double),POINTER(c_double),POINTER(c_int),c_int]
-lib.get_X.argtypes=[c_void_p]
-lib.get_X.restype=POINTER(c_double)
-lib.get_Y.argtypes=[c_void_p]
-lib.get_Y.restype=POINTER(c_double)
-lib.get_Index.argtypes=[c_void_p]
-lib.get_Index.restype=POINTER(c_int)
-lib.g_Size.argtypes=[c_void_p]
-lib.g_Size.restype=c_int
+lib.OutputSystemSite.argtypes=[POINTER(c_void_p),c_char_p]
+lib.OutputSystemSpring.argtypes=[POINTER(c_void_p),c_char_p]
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -115,15 +106,20 @@ cdict = {'blue':   ((0.0,  0.9,0.9),
 cm = LinearSegmentedColormap('my_colormap', cdict, 1024)
 
 class System:
-    def __init__(self,State,eps=0.,Kmain=1.,Kcoupling=1.,Kvol=1.):
+    def __init__(self,State=None,eps=0.,Kmain=1.,Kcoupling=1.,Kvol=1.,old_system=None):
+        if old_system==None:
+            self.None_Copy(State,eps,Kmain,Kcoupling,Kvol)
+        else :
+            self.Copy(old_system)
+    def None_Copy(self,State,eps,Kmain,Kcoupling,Kvol):
         # The system is created by a 2D array for a 2D system the shape[0] is
         # the  Y  lengft  while  the  shape[1]  is  the  X  shape  the   most
         # important part of this object is self.adress which is the adress of
         # the pointer toward the cpp object. Each time we call a c++ function
         # we have to give it the adress of the  pointer,  that  the  function
         # will interpret as a pointer toward the c++ object
-        self.Lx=State.shape[0] # X size of the system !!!!! shape[1] !!!!!!
-        self.Ly=State.shape[1] # Y size of the system !!!!! shape[0] !!!!!!
+        self.Lx=State.shape[0] # X size of the system !!!!!
+        self.Ly=State.shape[1] # Y size of the system !!!!!
         #--------------Convert the array into a pointer array---------------
         self.state=State # store the value of the binary system as a 2D array
         array=np.zeros(State.shape[0]*State.shape[1],dtype=int)
@@ -145,6 +141,17 @@ class System:
         self.Adress=lib.CreateSystem(Arraycpp,self.Lx,self.Ly,eps,Kmain,Kcoupling,Kvol) # create the system, all the argument are require here !!!!
         #--------------------Store the value of the Energy------------------
         self.Energy=lib.GetSystemEnergy(self.Adress) # store the value of the Energy (get energy only returns a number and doesn't reactualize the equilibrium of the system).
+    def Copy(self,old_system):
+        self.Lx=old_system.Lx
+        self.Ly=old_system.Ly
+        self.state=old_system.state
+        self.Kmain=old_system.Kmain
+        self.Kcoupling=old_system.Kcoupling
+        self.KVOL=old_system.KVOL
+        self.eps=old_system.eps
+        self.ActualizeNp()
+        self.Adress=lib.CopySystem(old_system.Adress)
+        self.Energy=lib.GetSystemEnergy(self.Adress)
     def __del__(self):
         lib.DeleteSystem(self.Adress) # deleting pointers is important in c++
     def PrintBinary(self):
@@ -174,7 +181,7 @@ class System:
             epsilon1=self.eps
         else :
             epsilon1=epsilon
-        lib.SetElasticConstant(epsilon1,Kmain1,Kcoupling1,KVOL1,self.Adress)
+        lib.SetElasticConstant(epsilon1,Kmain1,KCoupling1,KVOL1,self.Adress)
     def Evolv(self,NewState):            
         self.ActualizeNp()
         #------------Convert the new state into a pointer array-------------
@@ -201,31 +208,6 @@ class System:
         else :
             lib.UpdateSystemEnergy(self.Adress,Arraycpp,self.Lx,self.Ly) 
             self.Energy=lib.GetSystemEnergy(self.Adress)
-    def UpdateState(self,NewState):
-        self.ActualizeNp()
-        #------------Convert the new state into a pointer array-------------
-        self.state=NewState
-        array=np.zeros(self.state.shape[0]*self.state.shape[1],dtype=int)
-        for i in range(self.state.shape[0]):
-            for j in range(self.state.shape[1]):
-                array[i+j*self.state.shape[0]]=self.state[i,j]
-        Arraycpp = array.ctypes.data_as(POINTER(c_int))
-        for i in range(array.shape[0]):
-            Arraycpp[i]=array[i]
-        #-------------------------------------------------------------------
-        # Second most important function you give a new state and it computes
-        # the new equilibrium  state,  ît just goes faster as the newstate is
-        # close to the previous one.
-        #if NewState.shape[0] != self.Lx or NewState.shape[1] != self.Ly :
-            # if we changed the size of the system, we remake the whole system
-        #     self.Lx=NewState.shape[0]
-        #     self.Ly=NewState.shape[1]
-        #     lib.DeleteSystem(self.Adress)
-        #     self.Adress=lib.CreateSystem(Arraycpp,self.Lx,self.Ly,self.eps,self.Kmain,self.Kcoupling,self.KVOL)
-        #     self.Energy=lib.GetSystemEnergy(self.Adress)
-        #     print('create a new system')
-        #else :
-        lib.UpdateSystemState(self.Adress,Arraycpp,self.Lx,self.Ly)    
     def PrintPerSite(self,Name='NoName.txt'):
         # output the sytem per site (easier if you wanna plot the sites).
         if self.Np<1:
@@ -313,10 +295,4 @@ class System:
             self.Np=dict(zip(unique, counts))[1]
         except:
             self.Np=0
-    def StoreNodesPosition(self):
-        self.ArraySize=lib.g_Size(self.Adress)
-        self.X=lib.get_X(self.Adress)
-        self.Y=lib.get_Y(self.Adress)
-        self.Index=lib.get_Index(self.Adress)
-    def SetNodesPosition(self):
-        lib.SetNodesPosition(self.Adress,self.X,self.Y,self.Index,self.ArraySize)
+        

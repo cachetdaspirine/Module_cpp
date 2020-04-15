@@ -12,4 +12,5 @@ int MagicDim(int i, int j);
 int NeighNode(int i,int j);
 std::map<int,int> set_dim(int SiteNum,const std::vector<int>& State,int Lx,int Ly);
 int g_Nnodes();
+void Compute_G(Site* This,Site* Neigh);
 #endif
