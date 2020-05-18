@@ -7,7 +7,7 @@ Spring3::Spring3(Node* n1, Node* n2,Node* n3, double k, double a0)
   N1=n1;
   N2=n2;
   N3=n3;
-  K=k;
+  K=k/a0;
   A0=a0;
   Multiplicity=1;
 }
@@ -38,12 +38,12 @@ double Spring3::ComputeNRJ(VecDoub_I &x, double& Eflip){
   //------------------------------------------------
   //Computation of the volumique Energy
   //------------------------------------------------
-  double Evol(K/2.*pow(Air-A0,2));
+  double Evol(K/(2.)*pow(Air-A0,2));
   return Eflip+Evol;
 
 }
 
-void Spring3::ComputeDerivative(VecDoub_I &x, VecDoub_O &deriv){  
+void Spring3::ComputeDerivative(VecDoub_I &x, VecDoub_O &deriv){
     //store the value of their position
   int IX1(N1->g_IX()),IY1(N1->g_IY());
   int IX2(N2->g_IX()),IY2(N2->g_IY());
@@ -68,13 +68,13 @@ void Spring3::ComputeDerivative(VecDoub_I &x, VecDoub_O &deriv){
     else{
       Vprime=Hmin-Hmax;
     }
-    
+
     deriv[IX1]+=(VectUV*((X3-X1)/pow(NormV,2)+(X2-X1)*pow(NormU,2))+Y2-Y3)/(NormU*NormV)*
       (Vprime);
 
     deriv[IY1]+=(VectUV*((Y3-Y1)/pow(NormV,2)+(Y2-Y1)*pow(NormU,2))+X3-X2)/(NormU*NormV)*
       (Vprime);
-    
+
     deriv[IX2]+=((Y3-Y1)-(X2-X1)*VectUV/pow(NormU,2))/(NormU*NormV)*
       (Vprime);
 
@@ -92,15 +92,14 @@ void Spring3::ComputeDerivative(VecDoub_I &x, VecDoub_O &deriv){
   //------------------------------------------------
   double diff(Air-A0);
   deriv[IX1]+=K*(Y2-Y3)*diff/2.;
-  
+
   deriv[IY1]+=K*(X3-X2)*diff/2.;
-  
+
   deriv[IX2]+=K*(Y3-Y1)*diff/2.;
 
   deriv[IY2]+=K*(X1-X3)*diff/2.;
-  
+
   deriv[IX3]+=K*(Y1-Y2)*diff/2.;
-  
+
   deriv[IY3]+=K*(X2-X1)*diff/2.;
 }
-

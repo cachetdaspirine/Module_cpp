@@ -31,9 +31,9 @@ System::System(int* Array, int sizeX, int sizeY,double epsilon,double Kmain,doub
   DEBUG_IF(true){cout<<"Make the springs"<<endl;}
   MakeSprings();
   MakeSpring3();
-  
+
   // Build the CG
-  DEBUG_IF(true){cout<<"Build the CG"<<endl;}  
+  DEBUG_IF(true){cout<<"Build the CG"<<endl;}
   cg=new CG(K1,eps,K2,Kvol,sites.size());
 
   // Compute the Energy of the system
@@ -65,7 +65,7 @@ System::System(const System& old_system)
 	nodes[it3.first][{node->g_I()[it3.first],node->g_J()[it3.first],it2.second->g_dim()}]=node;
       }
       }
-    }} 
+    }}
   MakeSprings();
   MakeSpring3();
   cg=new CG(K1,eps,K2,Kvol,sites.size());
@@ -73,7 +73,7 @@ System::System(const System& old_system)
 
   Energy=old_system.Energy;
 
-  // }}}  
+  // }}}
 }
 System::~System()
 {
@@ -284,14 +284,14 @@ void System::MakeNodes()
       // Look at the map if we can find this node
       try{nodes[index].at({it.second->g_I(),it.second->g_J(),it.second->g_dim(index)});}
       // if not we create one
-      catch(const std::out_of_range& oor){       
+      catch(const std::out_of_range& oor){
 	Node* node=new Node(it.second,index,eps);
 	//arrange the new node in all the containers
 	for(auto & it2 : node->g_I()){
 	  nodes[it2.first][{node->g_I()[it2.first],node->g_J()[it2.first],it.second->g_dim(index)}]=node;
 	}
-      }      
-    } 
+      }
+    }
   }
 }
 void System::MakeSprings()
@@ -315,14 +315,14 @@ void System::MakeSprings()
       else
 	{
 	  N1=nodes[it2.second][{it.second->g_I(),it.second->g_J(),it.second->g_dim(it2.second)}];
-	  N2=nodes[it2.first][{it.second->g_I(),it.second->g_J(),it.second->g_dim(it2.first)}];	  
+	  N2=nodes[it2.first][{it.second->g_I(),it.second->g_J(),it.second->g_dim(it2.first)}];
 	}
       try{springs.at({N1,N2})->Multiplicitypp();}
       catch(const std::out_of_range& oor){
 	springs[{N1,N2}]=new Spring(N1,N2
 				    ,getK(it2.first,it2.second,this)
-				    ,getL0(it2.first,it2.second,this));	
-      }      
+				    ,getL0(it2.first,it2.second,this));
+      }
     }
   }
 }
