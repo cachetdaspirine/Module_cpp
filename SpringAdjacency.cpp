@@ -3,13 +3,13 @@
 using namespace std;
 //This function return a list of pair of index that should make a spring
 //becarefull each spring has to be made only once per site!
-vector< pair<int,int> > GetSpringAdjacency(int i, int j){  
+vector< pair<int,int> > GetSpringAdjacency(int i, int j){
   vector<pair<int,int>> Res;
   if((i+j)%2==0){
     Res.push_back({1,3});
     Res.push_back({1,5});
     Res.push_back({5,3});
-    
+
     Res.push_back({7,9});
     Res.push_back({7,11});
     Res.push_back({11,9});
@@ -20,10 +20,10 @@ vector< pair<int,int> > GetSpringAdjacency(int i, int j){
     /*
     Res.push_back({1,9});
     Res.push_back({1,11});
-    
+
     Res.push_back({5,7});
     Res.push_back({5,9});
-    
+
     Res.push_back({3,7});
     Res.push_back({3,11});*/
   }
@@ -31,7 +31,7 @@ vector< pair<int,int> > GetSpringAdjacency(int i, int j){
     Res.push_back({0,2});
     Res.push_back({0,4});
     Res.push_back({2,4});
-    
+
     Res.push_back({6,8});
     Res.push_back({6,10});
     Res.push_back({8,10});
@@ -107,7 +107,5 @@ double getL0(int index1, int index2,System* system){
       return 1+system->eps;
     }
   }
-  return 0;//sqrt(pow(system->eps * 2 / sqrt(3)+ sqrt(3)/2*(1-system->eps),2)+pow((1-system->eps)/2,2));
+  return 0.;//sqrt(pow(system->eps * 2 / sqrt(3)+ sqrt(3)/2*(1-system->eps),2)+pow((1-system->eps)/2,2));
 }
-
-				  
