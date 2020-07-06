@@ -13,11 +13,11 @@ vector< pair<int,int> > GetSpringAdjacency(int i, int j){
     Res.push_back({7,9});
     Res.push_back({7,11});
     Res.push_back({11,9});
-
+    /*
     Res.push_back({3,9});
     Res.push_back({1,7});
     Res.push_back({5,11});
-    /*
+    */
     Res.push_back({1,9});
     Res.push_back({1,11});
 
@@ -25,7 +25,7 @@ vector< pair<int,int> > GetSpringAdjacency(int i, int j){
     Res.push_back({5,9});
 
     Res.push_back({3,7});
-    Res.push_back({3,11});*/
+    Res.push_back({3,11});
   }
   else{
     Res.push_back({0,2});
@@ -35,19 +35,19 @@ vector< pair<int,int> > GetSpringAdjacency(int i, int j){
     Res.push_back({6,8});
     Res.push_back({6,10});
     Res.push_back({8,10});
-
+    /*
     Res.push_back({0,6});
     Res.push_back({2,8});
     Res.push_back({4,10});
-
-    /*    Res.push_back({0,8});
+    */
+    Res.push_back({0,8});
     Res.push_back({0,10});
 
     Res.push_back({4,6});
     Res.push_back({4,8});
 
     Res.push_back({2,6});
-    Res.push_back({2,10});*/
+    Res.push_back({2,10});
   }
   return Res;
 }
@@ -107,5 +107,5 @@ double getL0(int index1, int index2,System* system){
       return 1+system->eps;
     }
   }
-  return 0.;//sqrt(pow(system->eps * 2 / sqrt(3)+ sqrt(3)/2*(1-system->eps),2)+pow((1-system->eps)/2,2));
+  return sqrt(pow(system->eps * 2 / sqrt(3)+ sqrt(3)/2*(1-system->eps),2)+pow((1-system->eps)/2,2));
 }
