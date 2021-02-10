@@ -6,7 +6,7 @@ The state of the aggregate is given by a list of 0/1, which is a map of
 particle at discrete position [i,j]. The lattice we use can be  defined
 in the file Adjacency.cpp, which tells which [i,j] is neighbor to which
 [i',j']. The elasticity of any particles is defined by springs. A  file
-names  SpringBuilding.cpp  define  how  the  springs  are built in each 
+names  SpringBuilding.cpp  define  how  the  springs  are built in each
 particle.
  */
 class System{
@@ -19,9 +19,10 @@ class System{
   System(const System& old_system);
   // The destructor delete all the sites/nodes/springs pointers.
   ~System();
-  //-----------------------------------------------------------------------------------------------  
+  //-----------------------------------------------------------------------------------------------
   // Thos are the only two public function in our class.
   double get_Energy() const;
+  double Get_BulkEnergy();
   void UpdateEnergy(int* Array,int SizeX, int SizeY);
   //Output functions :
   void OutputSpring(const char* filename);
@@ -41,7 +42,7 @@ class System{
   std::map<int,std::map<std::tuple<int,int,int>,Node*>> nodes;
   std::map<std::pair<Node*,Node*>,Spring*> springs; // the springs are sorted by their node
   std::map<std::pair<int,int>,Spring3*> springs3;
-  void ResetNodePosition();
+  void ResetNodePosition(double EPS);
   bool NeighExist(int i, int j, int k);
   void g_G(int i, int j,double& Xg, double& Yg);
   void MakeSites();

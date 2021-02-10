@@ -38,6 +38,16 @@ extern "C"
       }
     catch(int e){cout<<"Error "<<e<<"\n";}
   }
+  double GetBulkEnergy(void* ptr)
+  {
+    try
+      {
+	System* system = reinterpret_cast<System *>(ptr);
+	return system->Get_BulkEnergy();
+      }
+    catch(int e)
+      {cout<<"Error "<<e<<"\n";}
+  }
   double GetSystemEnergy(void* ptr)
   {
     try

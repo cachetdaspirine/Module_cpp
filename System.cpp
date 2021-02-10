@@ -31,11 +31,11 @@ System::System(int* Array, int sizeX, int sizeY,double epsilon,double Kmain,doub
   DEBUG_IF(true){cout<<"Make the springs"<<endl;}
   MakeSprings();
   MakeSpring3();
-  
-  // Build the CG
-  DEBUG_IF(true){cout<<"Build the CG"<<endl;}  
-  cg=new CG(K1,eps,K2,Kvol,sites.size());
 
+  // Build the CG
+  DEBUG_IF(true){cout<<"Build the CG"<<endl;}
+  cg=new CG(K1,eps,K2,Kvol,sites.size());
+  //OutputSpring();
   // Compute the Energy of the system
   DEBUG_IF(true){cout<<"Compute the Energy"<<endl;}
   ComputeEnergy();
@@ -65,7 +65,7 @@ System::System(const System& old_system)
 	nodes[it3.first][{node->g_I()[it3.first],node->g_J()[it3.first],it2.second->g_dim()}]=node;
       }
       }
-    }} 
+    }}
   MakeSprings();
   MakeSpring3();
   cg=new CG(K1,eps,K2,Kvol,sites.size());
@@ -73,7 +73,7 @@ System::System(const System& old_system)
 
   Energy=old_system.Energy;
 
-  // }}}  
+  // }}}
 }
 System::~System()
 {
@@ -223,19 +223,41 @@ void System::ComputeEnergy()
   if(Re){return;}
   if(cg->CheckStability())
     {
-      ResetNodePosition();
+      ResetNodePosition(0.001);
       Re=true;
       goto Evolv;
     }
 }
+double System::Get_BulkEnergy(){
+  //ResetNodePosition(eps);
+  for(auto& site : sites){
+    double I(site.second->g_I());
+    double J(site.second->g_J());
+    std::vector<int> nodes_index(g_nodes_from_site(I,J));
+    for(auto& n_index : nodes_index){
+      nodes[n_index][{I,J,site.second->g_dim(n_index)}]->ResetPosition(n_index,0.);
+    }
+  }
+  vector<Node*> nodetovect;
+  for(auto& it: nodes[0]){
+    nodetovect.push_back(it.second);
+  }
+  for(auto& it: nodes[6]){
+    nodetovect.push_back(it.second);
+    }
+  cg->RemakeDoF(nodetovect);
+  cg->RemakeSprings(springs);
+  cg->RemakeSpring3(springs3);
+  return cg->ComputeEnergy();
+}
 double System::get_Energy() const {return Energy;}
 
 // {{{ Private Function
-void System::ResetNodePosition()
+void System::ResetNodePosition(double EPS)
 {
   int count(0);
-  for(auto& it : nodes[0]){it.second->ResetPosition(0);count++;}
-  for(auto& it : nodes[6]){it.second->ResetPosition(6);count++;}
+  for(auto& it : nodes[0]){it.second->ResetPosition(0,EPS);count++;}
+  for(auto& it : nodes[6]){it.second->ResetPosition(6,EPS);count++;}
 }
 void System::MakeSites()
 {
@@ -284,14 +306,14 @@ void System::MakeNodes()
       // Look at the map if we can find this node
       try{nodes[index].at({it.second->g_I(),it.second->g_J(),it.second->g_dim(index)});}
       // if not we create one
-      catch(const std::out_of_range& oor){       
+      catch(const std::out_of_range& oor){
 	Node* node=new Node(it.second,index,eps);
 	//arrange the new node in all the containers
 	for(auto & it2 : node->g_I()){
 	  nodes[it2.first][{node->g_I()[it2.first],node->g_J()[it2.first],it.second->g_dim(index)}]=node;
 	}
-      }      
-    } 
+      }
+    }
   }
 }
 void System::MakeSprings()
@@ -315,14 +337,14 @@ void System::MakeSprings()
       else
 	{
 	  N1=nodes[it2.second][{it.second->g_I(),it.second->g_J(),it.second->g_dim(it2.second)}];
-	  N2=nodes[it2.first][{it.second->g_I(),it.second->g_J(),it.second->g_dim(it2.first)}];	  
+	  N2=nodes[it2.first][{it.second->g_I(),it.second->g_J(),it.second->g_dim(it2.first)}];
 	}
       try{springs.at({N1,N2})->Multiplicitypp();}
       catch(const std::out_of_range& oor){
 	springs[{N1,N2}]=new Spring(N1,N2
 				    ,getK(it2.first,it2.second,this)
-				    ,getL0(it2.first,it2.second,this));	
-      }      
+				    ,getL0(it2.first,it2.second,this));
+      }
     }
   }
 }
@@ -348,11 +370,12 @@ void System::OutputSpring(const char* filename)
   Out.open(filename, ofstream::out | ofstream::trunc);
   for(auto& it: springs)
     {
-      //if(it.second->g_L0()==1+eps){
+      //if(it.second->g_L0()==1+eps ){//|| it.second->g_L0()==1-eps){
+      if(it.second->g_L0()==1+eps || it.second->g_L0()==1-eps){
       Out<<it.second->g_N1()->g_X()<<" "<<it.second->g_N1()->g_Y()<<" "
 	 <<it.second->g_N2()->g_X()<<" "<<it.second->g_N2()->g_Y()<<" "
 	 <<it.second->g_K()<<" "<<it.second->g_L0()<<endl;
-      //}
+      }
     }
   Out.close();
 }
