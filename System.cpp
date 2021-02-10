@@ -35,7 +35,7 @@ System::System(int* Array, int sizeX, int sizeY,double epsilon,double Kmain,doub
   // Build the CG
   DEBUG_IF(true){cout<<"Build the CG"<<endl;}
   cg=new CG(K1,eps,K2,Kvol,sites.size());
-
+  //OutputSpring();
   // Compute the Energy of the system
   DEBUG_IF(true){cout<<"Compute the Energy"<<endl;}
   ComputeEnergy();
@@ -223,19 +223,41 @@ void System::ComputeEnergy()
   if(Re){return;}
   if(cg->CheckStability())
     {
-      ResetNodePosition();
+      ResetNodePosition(0.001);
       Re=true;
       goto Evolv;
     }
 }
+double System::Get_BulkEnergy(){
+  //ResetNodePosition(eps);
+  for(auto& site : sites){
+    double I(site.second->g_I());
+    double J(site.second->g_J());
+    std::vector<int> nodes_index(g_nodes_from_site(I,J));
+    for(auto& n_index : nodes_index){
+      nodes[n_index][{I,J,site.second->g_dim(n_index)}]->ResetPosition(n_index,0.);
+    }
+  }
+  vector<Node*> nodetovect;
+  for(auto& it: nodes[0]){
+    nodetovect.push_back(it.second);
+  }
+  for(auto& it: nodes[6]){
+    nodetovect.push_back(it.second);
+    }
+  cg->RemakeDoF(nodetovect);
+  cg->RemakeSprings(springs);
+  cg->RemakeSpring3(springs3);
+  return cg->ComputeEnergy();
+}
 double System::get_Energy() const {return Energy;}
 
 // {{{ Private Function
-void System::ResetNodePosition()
+void System::ResetNodePosition(double EPS)
 {
   int count(0);
-  for(auto& it : nodes[0]){it.second->ResetPosition(0);count++;}
-  for(auto& it : nodes[6]){it.second->ResetPosition(6);count++;}
+  for(auto& it : nodes[0]){it.second->ResetPosition(0,EPS);count++;}
+  for(auto& it : nodes[6]){it.second->ResetPosition(6,EPS);count++;}
 }
 void System::MakeSites()
 {
@@ -348,7 +370,8 @@ void System::OutputSpring(const char* filename)
   Out.open(filename, ofstream::out | ofstream::trunc);
   for(auto& it: springs)
     {
-      if(it.second->g_L0()==1+eps){
+      //if(it.second->g_L0()==1+eps ){//|| it.second->g_L0()==1-eps){
+      if(it.second->g_L0()==1+eps || it.second->g_L0()==1-eps){
       Out<<it.second->g_N1()->g_X()<<" "<<it.second->g_N1()->g_Y()<<" "
 	 <<it.second->g_N2()->g_X()<<" "<<it.second->g_N2()->g_Y()<<" "
 	 <<it.second->g_K()<<" "<<it.second->g_L0()<<endl;

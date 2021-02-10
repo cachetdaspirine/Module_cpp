@@ -38,20 +38,22 @@ void Node::set_Y(double y){Y=y;}
 void Node::set_IX(int ix){IX=ix;}
 void Node::set_IY(int iy){IY=iy;}
 
-void Node::ResetPosition(int type)
+void Node::ResetPosition(int type,double EPS)
 {
-  bool down(false);  
-  if(type==0){
-    if((I[0]+J[0])%2==0)
+  bool down(false);
+  //if(type==0){
+    if((I[type]+J[type])%2==0)
       {down=true;
-	SetInitialPosition(X,Y,0,down,0.001,I[0]*0.5,J[0]*0.866+0.5774);
+	SetInitialPosition(X,Y,type,down,EPS,I[type]*0.5,J[type]*0.866+0.5774);
       }
-    else{SetInitialPosition(X,Y,0,down,0.001,I[0]*0.5,J[0]*0.866+0.2887);}
-  }
+    else{SetInitialPosition(X,Y,type,down,EPS,I[type]*0.5,J[type]*0.866+0.2887);}
+  //}
+  /*
   else if(type==6){
     if((I[6]+J[6])%2==0)
       {down=true;
-	SetInitialPosition(X,Y,0,down,0.001,I[6]*0.5,J[6]*0.866+0.5774);}
-    else{SetInitialPosition(X,Y,0,down,0.001,I[6]*0.5,J[6]*0.866+0.2887);}
+	SetInitialPosition(X,Y,6,down,EPS,I[6]*0.5,J[6]*0.866+0.5774);}
+    else{SetInitialPosition(X,Y,6,down,EPS,I[6]*0.5,J[6]*0.866+0.2887);}
   }
+  */
 }

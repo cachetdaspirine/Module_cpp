@@ -17,7 +17,7 @@ void CG::RemakeDoF(vector<Node*> nodes){
     nodes[i]->set_IX(2*i);
     DoF[2*i+1]=nodes[i]->g_Y();
     nodes[i]->set_IY(2*i+1);
-  }  
+  }
 }
 
 void CG::RemakeSprings(std::map<std::pair<Node*, Node*>, Spring*> springs){
@@ -31,7 +31,9 @@ void CG::RemakeSpring3(std::map<std::pair<int,int>,Spring3*> springs3){
 }
 
 double CG::GetEnergy(){return Energy;}
-
+double CG::ComputeEnergy(){
+return ham(DoF);
+}
 void CG::Evolv(){
   Frprmn<Ham> frprmn(ham);
   DoF=frprmn.minimize(DoF);

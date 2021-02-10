@@ -5,7 +5,7 @@ class Node{
   Node();
   Node(Site* S,int k ,double eps);
   ~Node();
-  
+
   std::map<int,int> g_I() const;
   std::map<int,int> g_J() const;
   int g_dim() const;
@@ -22,7 +22,7 @@ class Node{
   void set_IX(int ix);
   void set_IY(int iy);
 
-  void ResetPosition(int type);
+  void ResetPosition(int type,double EPS);
  private:
   // two vector for the list of index i,j for each k.
   std::map<int,int> I;
