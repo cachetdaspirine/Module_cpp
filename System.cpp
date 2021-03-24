@@ -250,7 +250,7 @@ double System::Get_BulkEnergy(){
   cg->RemakeSpring3(springs3);
   return cg->ComputeEnergy();
 }
-double System::get_Energy() const {return Energy;}
+double System::get_Energy() const {return cg->ComputeEnergy();}
 
 // {{{ Private Function
 void System::ResetNodePosition(double EPS)
@@ -401,7 +401,92 @@ bool System::NeighExist(int i, int j, int k)
  {
 
  }
+vector<Node*> System::GetSideNodes(bool TopOrLeft,bool Horizontal)
+  { /*
+               true, true
+                ______
+               |      |
+   true, false |      | false, false
+               |______|
+               false, true
 
+    */
+   set<Node*> NodeToVect;
+ //              i / j / k
+   vector<tuple<int,int,int>> Index(Get_Boundary_Nodes(TopOrLeft,Horizontal,Lx,Ly));
+   /*for(auto& it : sites){
+     cout<<it.first%Lx<<" "<<it.first/Lx<<endl;
+   }*/
+   for(auto& I : Index) {
+       int i(get<0>(I)),j(get<1>(I)),k(get<2>(I));
+       /*cout<<i<<" "<<j<<" "<<k<<endl;
+       try{
+       cout<<sites.at(i+j*Lx)<<endl;}
+       catch(int e){cout<<"yep";throw 0;}*/
+       NodeToVect.insert(nodes[k][{i,j,sites[i+j*Lx]->g_dim(k)}]);
+   }
+   vector<Node*> Res(NodeToVect.begin(),NodeToVect.end());
+   return Res;
+  }
+  vector<Node*> System::NodeToVect()
+  {
+    set<Node*> Res;
+    /*if ( Free ){
+      for(auto& it : nodes[0]){if(!it.second->g_fix()){Res.insert(it.second);}}
+      for(auto& it : nodes[6]){if(!it.second->g_fix()){Res.insert(it.second);}}
+    }*/
+    //else{
+      for(auto& it : nodes[0]){Res.insert(it.second);}
+      for(auto& it : nodes[6]){Res.insert(it.second);}
+    //}
+    vector<Node*> RRes(Res.begin(),Res.end());
+    return RRes;
+  }
+  void System::MoveNodes(double Gx, double Gy)
+  {
+     for (auto& it : nodes[0]){
+       it.second->set_X((1+Gx)*it.second->g_X());
+       it.second->set_Y((1+Gy)*it.second->g_Y());
+     }
+     for (auto& it : nodes[6]){
+       it.second->set_X((1+Gx)*it.second->g_X());
+       it.second->set_Y((1+Gy)*it.second->g_Y());
+     }
+     std::vector<Node*> nodetovect(NodeToVect());
+     cg->RemakeDoF(nodetovect);
+  }
+
+  double System::Get_Extension(int ax)
+{
+  if(ax == 0){
+    vector<Node*> SidesLeft(GetSideNodes(true,false));
+    vector<Node*> SidesRight(GetSideNodes(false,false));
+    double XLeft(0),XRight(0);
+    for(auto& it : SidesLeft){
+      XLeft+=it->g_X();
+    }
+    XLeft=XLeft/SidesLeft.size();
+    for(auto& it : SidesRight){
+      XRight+=it->g_X();
+    }
+    XRight = XRight/SidesRight.size();
+    return XRight-XLeft;
+  }
+  if(ax == 1){
+    vector<Node*> SidesTop(GetSideNodes(true,true));
+    vector<Node*> SidesBot(GetSideNodes(false,true));
+    double YTop(0),YBot(0);
+    for(auto& it : SidesTop){
+      YTop+=it->g_Y();
+    }
+    for(auto& it : SidesBot){
+      YBot+=it->g_Y();
+    }
+    YTop = YTop / SidesTop.size();
+    YBot = YBot / SidesBot.size();
+    return YTop-YBot;
+  }
+}
 /*
 void System::DeleteAllNode(int i, int j)
 {

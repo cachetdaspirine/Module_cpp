@@ -23,6 +23,8 @@ class System{
   // Thos are the only two public function in our class.
   double get_Energy() const;
   double Get_BulkEnergy();
+  void MoveNodes(double Gx, double Gy);
+  double Get_Extension(int ax);
   void UpdateEnergy(int* Array,int SizeX, int SizeY);
   //Output functions :
   void OutputSpring(const char* filename);
@@ -30,6 +32,8 @@ class System{
   //-----------------------------------------------------------------------------------------------
   double K1,K2,Kvol,eps;
  private:
+  std::vector<Node*> NodeToVect();
+  std::vector<Node*> GetSideNodes(bool TopOrLeft,bool Horizontal);
   double Energy;
   vector<int> CurrentState;
   //-----------------------------------------------------------------------------------------------
